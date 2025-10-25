@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard para Consultas Nutricionales</title>
+    <style>
+        :root {
+            --verde-oscuro: #2a9d8f;
+            --verde-claro: #81b29a;
+            --naranja: #f4a261;
+            --azul-oscuro: #264653;
+            --gris: #f0f3f5;
+            --gris-oscuro: #4a4a4a;
+            font-size: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: var(--gris);
+            color: var(--azul-oscuro);
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--azul-oscuro), var(--verde-oscuro));
+            color: white;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        header p {
+            margin: 0.5rem 0 0;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 2rem auto 4rem;
+            padding: 0 1.5rem 3rem;
+        }
+
+        section {
+            background: white;
+            border-radius: 16px;
+            padding: 1.75rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 15px 35px rgba(38, 70, 83, 0.08);
+        }
+
+        section h2 {
+            margin-top: 0;
+            color: var(--azul-oscuro);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.6rem;
+            border-bottom: 2px solid var(--gris);
+            padding-bottom: 0.75rem;
+        }
+
+        section h2 span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--verde-oscuro);
+            color: white;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: var(--gris-oscuro);
+            margin-bottom: 0.35rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.65rem 0.75rem;
+            border-radius: 12px;
+            border: 1px solid rgba(38, 70, 83, 0.15);
+            background: #fdfdfd;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--verde-oscuro);
+            box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.18);
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .chip-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-top: 0.5rem;
+        }
+
+        .chip {
+            padding: 0.45rem 0.85rem;
+            border-radius: 999px;
+            background: rgba(42, 157, 143, 0.14);
+            color: var(--azul-oscuro);
+            font-size: 0.95rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(38, 70, 83, 0.05);
+        }
+
+        th, td {
+            padding: 0.85rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(38, 70, 83, 0.1);
+        }
+
+        th {
+            background: rgba(38, 70, 83, 0.08);
+            font-weight: 600;
+            color: var(--azul-oscuro);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .flex {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .flex > div {
+            flex: 1 1 220px;
+        }
+
+        .tag-input {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .tag-input input {
+            flex: 1 1 220px;
+        }
+
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag-list span {
+            background: var(--verde-claro);
+            color: white;
+            border-radius: 999px;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+            border-radius: 999px;
+            padding: 0.65rem 1.2rem;
+            background: var(--naranja);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px rgba(244, 162, 97, 0.2);
+        }
+
+        .button.secondary {
+            background: rgba(38, 70, 83, 0.08);
+            color: var(--azul-oscuro);
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(244, 162, 97, 0.12);
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            color: var(--azul-oscuro);
+            font-weight: 500;
+        }
+
+        .totals {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .totals div {
+            background: rgba(38, 70, 83, 0.08);
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            min-width: 150px;
+            font-weight: 600;
+            color: var(--azul-oscuro);
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            color: var(--verde-oscuro);
+        }
+
+        .status::before {
+            content: "";
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--verde-oscuro);
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 1rem 3rem;
+            color: rgba(38, 70, 83, 0.6);
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            header p {
+                font-size: 1rem;
+            }
+
+            section {
+                padding: 1.4rem;
+            }
+
+            .tag-input {
+                flex-direction: column;
+            }
+
+            .button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Suite de Consulta Nutricional</h1>
+    <p>Herramientas integradas para evaluar, planificar y dar seguimiento a tus pacientes en un solo lugar.</p>
+</header>
+
+<main>
+    <section id="perfil">
+        <h2><span>1</span> Perfil del paciente</h2>
+        <div class="grid-2">
+            <div>
+                <label for="nombre">Nombre completo</label>
+                <input type="text" id="nombre" placeholder="Ej. Laura Martínez">
+            </div>
+            <div>
+                <label for="edad">Edad</label>
+                <input type="number" id="edad" placeholder="Ej. 32">
+            </div>
+            <div>
+                <label for="sexo">Sexo biológico</label>
+                <select id="sexo">
+                    <option value="">Seleccionar</option>
+                    <option value="femenino">Femenino</option>
+                    <option value="masculino">Masculino</option>
+                    <option value="otro">Prefiere no decirlo</option>
+                </select>
+            </div>
+            <div>
+                <label for="contacto">Contacto</label>
+                <input type="text" id="contacto" placeholder="Correo o teléfono">
+            </div>
+        </div>
+        <div class="grid-2" style="margin-top: 1rem;">
+            <div>
+                <label for="peso">Peso actual (kg)</label>
+                <input type="number" id="peso" step="0.1" placeholder="Ej. 68.5">
+            </div>
+            <div>
+                <label for="altura">Talla (cm)</label>
+                <input type="number" id="altura" step="0.1" placeholder="Ej. 165">
+            </div>
+            <div>
+                <label>IMC</label>
+                <div class="pill"><span id="imc">--</span> <span id="imc-estado"></span></div>
+            </div>
+            <div>
+                <label for="objetivos">Objetivos principales</label>
+                <textarea id="objetivos" placeholder="Ej. control de glucosa, pérdida de grasa, mejora de hábitos"></textarea>
+            </div>
+        </div>
+    </section>
+
+    <section id="antecedentes">
+        <h2><span>2</span> Antecedentes y hábitos</h2>
+        <div class="grid-2">
+            <div>
+                <label>Condiciones clínicas relevantes</label>
+                <div class="chip-group">
+                    <span class="chip">Diabetes</span>
+                    <span class="chip">Hipertensión</span>
+                    <span class="chip">Hipotiroidismo</span>
+                    <span class="chip">Dislipidemias</span>
+                    <span class="chip">Celiaquía</span>
+                    <span class="chip">Otra</span>
+                </div>
+                <textarea placeholder="Especificar diagnóstico, medicamentos y observaciones"></textarea>
+            </div>
+            <div>
+                <label>Estilo de vida</label>
+                <textarea placeholder="Describe horarios de trabajo, estrés, sueño, consumo de alcohol/tabaco"></textarea>
+                <div class="flex" style="margin-top: 1rem;">
+                    <div>
+                        <label for="actividad">Nivel de actividad física</label>
+                        <select id="actividad">
+                            <option value="">Seleccionar</option>
+                            <option>Sedentario</option>
+                            <option>Ligero (1-3 días/sem)</option>
+                            <option>Moderado (3-5 días/sem)</option>
+                            <option>Intenso (6-7 días/sem)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="sueno">Calidad del sueño</label>
+                        <select id="sueno">
+                            <option value="">Seleccionar</option>
+                            <option>Óptima</option>
+                            <option>Adecuada</option>
+                            <option>Irregular</option>
+                            <option>Deficiente</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="registro">
+        <h2><span>3</span> Recordatorio de 24 horas / Registro alimentario</h2>
+        <p>Detalla los alimentos consumidos y horarios para identificar patrones y oportunidades de intervención.</p>
+        <table>
+            <thead>
+            <tr>
+                <th>Tiempo de comida</th>
+                <th>Horario</th>
+                <th>Alimentos y porciones</th>
+                <th>Observaciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Desayuno</td>
+                <td><input type="time"></td>
+                <td><textarea placeholder="Ej. avena con fruta, café"></textarea></td>
+                <td><textarea placeholder="Hambre, saciedad, emociones"></textarea></td>
+            </tr>
+            <tr>
+                <td>Comida</td>
+                <td><input type="time"></td>
+                <td><textarea></textarea></td>
+                <td><textarea></textarea></td>
+            </tr>
+            <tr>
+                <td>Cena</td>
+                <td><input type="time"></td>
+                <td><textarea></textarea></td>
+                <td><textarea></textarea></td>
+            </tr>
+            <tr>
+                <td>Snacks / Otros</td>
+                <td><input type="time"></td>
+                <td><textarea></textarea></td>
+                <td><textarea></textarea></td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="plan">
+        <h2><span>4</span> Plan alimenticio personalizado</h2>
+        <div class="flex">
+            <div>
+                <label for="kcal">Meta energética diaria (kcal)</label>
+                <input type="number" id="kcal" placeholder="Ej. 1800">
+            </div>
+            <div>
+                <label for="proteina">Proteínas objetivo (g)</label>
+                <input type="number" id="proteina" placeholder="Ej. 110">
+            </div>
+            <div>
+                <label for="carbohidratos">Carbohidratos objetivo (g)</label>
+                <input type="number" id="carbohidratos" placeholder="Ej. 200">
+            </div>
+            <div>
+                <label for="grasas">Grasas objetivo (g)</label>
+                <input type="number" id="grasas" placeholder="Ej. 60">
+            </div>
+        </div>
+
+        <div class="pill" style="margin-top: 1rem;">
+            <strong>Consejo:</strong> Ajusta porciones y distribuye los macronutrientes acorde al estilo de vida del paciente.
+        </div>
+
+        <table id="tabla-plan">
+            <thead>
+            <tr>
+                <th>Tiempo de comida</th>
+                <th>Alimentos sugeridos</th>
+                <th>Porciones / Preparación</th>
+                <th>kcal</th>
+                <th>Proteína (g)</th>
+                <th>CHO (g)</th>
+                <th>Grasa (g)</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><input type="text" value="Desayuno"></td>
+                <td><textarea placeholder="Ej. Tazón de yogurt griego con frutos rojos"></textarea></td>
+                <td><textarea placeholder="200 g yogurt + 30 g granola + 80 g frutos rojos"></textarea></td>
+                <td><input type="number" class="macro kcal" placeholder="300"></td>
+                <td><input type="number" class="macro prote">
+                </td>
+                <td><input type="number" class="macro cho"></td>
+                <td><input type="number" class="macro grasa"></td>
+                <td><button class="button secondary" type="button" aria-label="Eliminar fila">Eliminar</button></td>
+            </tr>
+            <tr>
+                <td><input type="text" value="Comida"></td>
+                <td><textarea placeholder="Ej. Ensalada templada de salmón"></textarea></td>
+                <td><textarea placeholder="120 g salmón + 1 taza quinoa + verduras"></textarea></td>
+                <td><input type="number" class="macro kcal"></td>
+                <td><input type="number" class="macro prote"></td>
+                <td><input type="number" class="macro cho"></td>
+                <td><input type="number" class="macro grasa"></td>
+                <td><button class="button secondary" type="button">Eliminar</button></td>
+            </tr>
+            <tr>
+                <td><input type="text" value="Cena"></td>
+                <td><textarea placeholder="Ej. Crema de verduras + tortilla integral"></textarea></td>
+                <td><textarea placeholder="300 ml crema + 1 tortilla + 40 g aguacate"></textarea></td>
+                <td><input type="number" class="macro kcal"></td>
+                <td><input type="number" class="macro prote"></td>
+                <td><input type="number" class="macro cho"></td>
+                <td><input type="number" class="macro grasa"></td>
+                <td><button class="button secondary" type="button">Eliminar</button></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div style="margin-top: 1rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+            <button class="button" type="button" id="agregar-fila">Añadir tiempo de comida</button>
+            <div class="status">Plan listo para entregar</div>
+        </div>
+
+        <div class="totals">
+            <div>Total kcal: <span id="total-kcal">0</span></div>
+            <div>Total proteína: <span id="total-prote">0</span> g</div>
+            <div>Total CHO: <span id="total-cho">0</span> g</div>
+            <div>Total grasa: <span id="total-grasa">0</span> g</div>
+        </div>
+    </section>
+
+    <section id="recursos">
+        <h2><span>5</span> Biblioteca de recursos y recetas</h2>
+        <p>Arrastra ideas al plan o compártelas con el paciente como material educativo.</p>
+        <div class="grid-2">
+            <div>
+                <h3>Recetas rápidas</h3>
+                <ul>
+                    <li>Ensalada mediterránea con garbanzos</li>
+                    <li>Wrap integral de pollo y hummus</li>
+                    <li>Parfait de yogurt con avena y semillas</li>
+                    <li>Crema de calabaza con jengibre</li>
+                </ul>
+            </div>
+            <div>
+                <h3>Educación nutricional</h3>
+                <ul>
+                    <li>Guía de porciones y equivalentes</li>
+                    <li>Planificación semanal inteligente</li>
+                    <li>Lista de compras consciente</li>
+                    <li>Estrategias para comer fuera de casa</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="seguimiento">
+        <h2><span>6</span> Seguimiento y próximas acciones</h2>
+        <div class="grid-2">
+            <div>
+                <label for="tareas">Tareas para el paciente</label>
+                <textarea id="tareas" placeholder="Ej. registrar ingestas, preparar colaciones saludables"></textarea>
+            </div>
+            <div>
+                <label for="observaciones">Observaciones del profesional</label>
+                <textarea id="observaciones" placeholder="Anota hallazgos clave para próximas sesiones"></textarea>
+            </div>
+        </div>
+        <div class="grid-2" style="margin-top: 1rem;">
+            <div>
+                <label for="fecha-control">Fecha del próximo control</label>
+                <input type="date" id="fecha-control">
+            </div>
+            <div>
+                <label for="canales">Canales de seguimiento</label>
+                <select id="canales">
+                    <option>Correo electrónico</option>
+                    <option>Aplicación / chat</option>
+                    <option>Llamada telefónica</option>
+                    <option>Visita presencial</option>
+                </select>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer>
+    Diseñado para optimizar tu consulta nutricional y elevar la experiencia de tus pacientes.
+</footer>
+
+<script>
+    const pesoInput = document.getElementById('peso');
+    const alturaInput = document.getElementById('altura');
+    const imcSpan = document.getElementById('imc');
+    const imcEstado = document.getElementById('imc-estado');
+    const tablaPlan = document.getElementById('tabla-plan');
+    const agregarFilaBtn = document.getElementById('agregar-fila');
+    const totalKcal = document.getElementById('total-kcal');
+    const totalProte = document.getElementById('total-prote');
+    const totalCho = document.getElementById('total-cho');
+    const totalGrasa = document.getElementById('total-grasa');
+
+    const estadosIMC = [
+        { max: 18.5, texto: 'Bajo peso' },
+        { max: 24.9, texto: 'Peso saludable' },
+        { max: 29.9, texto: 'Sobrepeso' },
+        { max: Infinity, texto: 'Obesidad' }
+    ];
+
+    function calcularIMC() {
+        const peso = parseFloat(pesoInput.value);
+        const altura = parseFloat(alturaInput.value);
+
+        if (!peso || !altura) {
+            imcSpan.textContent = '--';
+            imcEstado.textContent = '';
+            return;
+        }
+
+        const alturaMetros = altura / 100;
+        const imc = peso / (alturaMetros * alturaMetros);
+        const imcRedondeado = imc.toFixed(1);
+
+        imcSpan.textContent = imcRedondeado;
+        const estado = estadosIMC.find(rango => imc <= rango.max);
+        imcEstado.textContent = estado ? estado.texto : '';
+    }
+
+    function crearFilaPlan() {
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+            <td><input type="text" placeholder="Nuevo tiempo"></td>
+            <td><textarea placeholder="Alimentos sugeridos"></textarea></td>
+            <td><textarea placeholder="Porciones / preparación"></textarea></td>
+            <td><input type="number" class="macro kcal"></td>
+            <td><input type="number" class="macro prote"></td>
+            <td><input type="number" class="macro cho"></td>
+            <td><input type="number" class="macro grasa"></td>
+            <td><button class="button secondary" type="button">Eliminar</button></td>
+        `;
+        return fila;
+    }
+
+    function actualizarTotales() {
+        const macros = tablaPlan.querySelectorAll('tbody tr');
+        let kcal = 0, prote = 0, cho = 0, grasa = 0;
+
+        macros.forEach(fila => {
+            const kcalInput = fila.querySelector('.kcal');
+            const proteInput = fila.querySelector('.prote');
+            const choInput = fila.querySelector('.cho');
+            const grasaInput = fila.querySelector('.grasa');
+
+            kcal += parseFloat(kcalInput?.value) || 0;
+            prote += parseFloat(proteInput?.value) || 0;
+            cho += parseFloat(choInput?.value) || 0;
+            grasa += parseFloat(grasaInput?.value) || 0;
+        });
+
+        totalKcal.textContent = kcal.toFixed(0);
+        totalProte.textContent = prote.toFixed(0);
+        totalCho.textContent = cho.toFixed(0);
+        totalGrasa.textContent = grasa.toFixed(0);
+    }
+
+    function manejarClickTabla(event) {
+        if (event.target.matches('button')) {
+            const fila = event.target.closest('tr');
+            fila.remove();
+            actualizarTotales();
+        }
+    }
+
+    function manejarEntradaMacro(event) {
+        if (event.target.classList.contains('macro')) {
+            actualizarTotales();
+        }
+    }
+
+    pesoInput.addEventListener('input', calcularIMC);
+    alturaInput.addEventListener('input', calcularIMC);
+
+    agregarFilaBtn.addEventListener('click', () => {
+        const nuevaFila = crearFilaPlan();
+        tablaPlan.querySelector('tbody').appendChild(nuevaFila);
+    });
+
+    tablaPlan.addEventListener('click', manejarClickTabla);
+    tablaPlan.addEventListener('input', manejarEntradaMacro);
+
+    actualizarTotales();
+</script>
+</body>
+</html>

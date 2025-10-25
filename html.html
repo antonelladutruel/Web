@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente Profesional para Consultas Nutricionales</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --verde-primario: #2bc0a4;
+            --verde-oscuro: #1e8573;
+            --azul-oscuro: #1b3340;
+            --gris-claro: #f4f6f8;
+            --gris: #e4ebf0;
+            --gris-texto: #5a6a73;
+            --naranja: #ff8c42;
+            --gradiente: linear-gradient(135deg, #1e8573, #2bc0a4);
+            font-size: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: var(--gris-claro);
+            color: var(--azul-oscuro);
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--gradiente);
+            color: white;
+            padding: clamp(2rem, 4vw, 3rem) clamp(1.5rem, 4vw, 3rem);
+            box-shadow: 0 18px 45px rgba(27, 51, 64, 0.28);
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            letter-spacing: -0.5px;
+        }
+
+        header p {
+            margin: 0.75rem 0 0;
+            max-width: 640px;
+            font-weight: 500;
+            font-size: 1.05rem;
+            color: rgba(255, 255, 255, 0.88);
+        }
+
+        main {
+            max-width: 1400px;
+            margin: clamp(1.5rem, 4vw, 3rem) auto;
+            padding: 0 clamp(1rem, 4vw, 2rem) 4rem;
+        }
+
+        .app {
+            display: grid;
+            gap: clamp(1rem, 3vw, 1.75rem);
+            grid-template-columns: minmax(280px, 340px) 1fr;
+        }
+
+        .panel, section.card {
+            background: white;
+            border-radius: 20px;
+            padding: clamp(1.25rem, 2vw, 1.75rem);
+            box-shadow: 0 20px 45px rgba(27, 51, 64, 0.08);
+        }
+
+        .panel h2, .workspace h2 {
+            margin: 0;
+            font-size: 1.35rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .panel h2 span, .workspace h2 span {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(43, 192, 164, 0.15);
+            color: var(--verde-oscuro);
+            font-weight: 600;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        button.primary, button.ghost {
+            border: none;
+            border-radius: 14px;
+            padding: 0.6rem 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button.primary {
+            background: var(--gradiente);
+            color: white;
+            box-shadow: 0 12px 30px rgba(27, 51, 64, 0.2);
+        }
+
+        button.primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 40px rgba(27, 51, 64, 0.24);
+        }
+
+        button.ghost {
+            background: rgba(27, 51, 64, 0.06);
+            color: var(--azul-oscuro);
+        }
+
+        button.ghost:hover {
+            background: rgba(27, 51, 64, 0.12);
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            border-radius: 14px;
+            border: 1px solid rgba(27, 51, 64, 0.12);
+            padding: 0.65rem 1rem 0.65rem 2.75rem;
+            background: rgba(27, 51, 64, 0.04);
+        }
+
+        .search-box svg {
+            position: absolute;
+            top: 50%;
+            left: 0.9rem;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            stroke: var(--gris-texto);
+        }
+
+        ul.client-list {
+            list-style: none;
+            margin: 1rem 0 0;
+            padding: 0;
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .client-card {
+            border: 1px solid rgba(27, 51, 64, 0.08);
+            border-radius: 16px;
+            padding: 0.85rem 1rem;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 0.75rem;
+            align-items: center;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+        }
+
+        .client-card.active {
+            border-color: var(--verde-primario);
+            box-shadow: 0 16px 32px rgba(43, 192, 164, 0.25);
+        }
+
+        .client-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .client-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .client-meta strong {
+            font-size: 1rem;
+            letter-spacing: -0.2px;
+        }
+
+        .client-meta span {
+            color: var(--gris-texto);
+            font-size: 0.85rem;
+        }
+
+        .client-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .client-actions button {
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            padding: 0.35rem;
+            border-radius: 10px;
+            transition: background 0.15s ease;
+        }
+
+        .client-actions button:hover {
+            background: rgba(27, 51, 64, 0.08);
+        }
+
+        .workspace {
+            display: grid;
+            gap: clamp(1rem, 2vw, 1.5rem);
+        }
+
+        .workspace-header {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .workspace-header h1 {
+            margin: 0;
+            font-size: clamp(1.6rem, 3vw, 2.1rem);
+            letter-spacing: -0.4px;
+        }
+
+        .workspace-header p {
+            margin: 0;
+            color: var(--gris-texto);
+        }
+
+        .summary-grid {
+            display: grid;
+            gap: 0.8rem;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        }
+
+        .summary-card {
+            border-radius: 16px;
+            padding: 1rem 1.1rem;
+            background: linear-gradient(135deg, rgba(43, 192, 164, 0.12), rgba(27, 51, 64, 0.08));
+            display: grid;
+            gap: 0.35rem;
+        }
+
+        .summary-card h3 {
+            margin: 0;
+            font-size: 0.95rem;
+            color: var(--gris-texto);
+            font-weight: 600;
+        }
+
+        .summary-card strong {
+            font-size: 1.35rem;
+            letter-spacing: -0.3px;
+        }
+
+        .summary-card small {
+            font-size: 0.8rem;
+            color: rgba(27, 51, 64, 0.7);
+        }
+
+        section.card h2 {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 1rem 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: var(--gris-texto);
+            margin-bottom: 0.4rem;
+            letter-spacing: -0.2px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            border-radius: 14px;
+            border: 1px solid rgba(27, 51, 64, 0.1);
+            padding: 0.65rem 0.75rem;
+            background: rgba(27, 51, 64, 0.03);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--verde-primario);
+            box-shadow: 0 0 0 3px rgba(43, 192, 164, 0.2);
+            background: white;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .two-columns {
+            display: grid;
+            gap: 1.2rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 18px;
+            overflow: hidden;
+            margin-top: 1rem;
+            background: white;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            border-bottom: 1px solid rgba(27, 51, 64, 0.08);
+            text-align: left;
+        }
+
+        th {
+            background: rgba(27, 51, 64, 0.05);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        td input, td textarea {
+            width: 100%;
+            background: transparent;
+            border: none;
+            padding: 0;
+            font-size: 0.95rem;
+        }
+
+        td textarea {
+            min-height: 60px;
+        }
+
+        td input:focus, td textarea:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        tbody tr:hover {
+            background: rgba(43, 192, 164, 0.08);
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .totals-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+            background: rgba(27, 51, 64, 0.05);
+            border-radius: 14px;
+            padding: 0.75rem 1rem;
+        }
+
+        .totals-bar span {
+            font-weight: 600;
+            color: var(--gris-texto);
+            font-size: 0.9rem;
+        }
+
+        .alert {
+            margin-top: 0.8rem;
+            border-radius: 14px;
+            padding: 0.75rem 1rem;
+            background: rgba(255, 140, 66, 0.12);
+            color: #d4661c;
+            font-weight: 600;
+            display: none;
+        }
+
+        @media (max-width: 1080px) {
+            .app {
+                grid-template-columns: 1fr;
+            }
+
+            .panel {
+                position: sticky;
+                top: calc(84px + 1rem);
+                max-height: calc(100vh - 120px);
+                overflow-y: auto;
+            }
+        }
+
+        @media (max-width: 640px) {
+            header {
+                position: static;
+            }
+
+            .panel {
+                position: static;
+                max-height: none;
+            }
+
+            .totals-bar {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Asistente integral para consultas nutricionales</h1>
+        <p>Gestiona tu base de pacientes, registra datos clínicos en vivo y genera planes personalizados con cálculos automáticos sin salir de la misma vista.</p>
+    </header>
+    <main>
+        <div class="app">
+            <aside class="panel" aria-label="Gestión de pacientes">
+                <div class="panel-header">
+                    <h2><span>👥</span> Pacientes</h2>
+                    <button class="primary" id="newClientBtn">➕ Nuevo</button>
+                </div>
+                <div class="search-box">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="6"></circle>
+                        <line x1="17" y1="17" x2="21" y2="21"></line>
+                    </svg>
+                    <input type="search" id="clientSearch" placeholder="Buscar por nombre o email" autocomplete="off">
+                </div>
+                <ul class="client-list" id="clientList" aria-live="polite"></ul>
+            </aside>
+
+            <div class="workspace">
+                <div class="panel workspace-header">
+                    <div>
+                        <h1 id="clientTitle">Selecciona un paciente</h1>
+                        <p id="clientSubtitle">Los datos y cálculos se actualizarán automáticamente al editar los campos.</p>
+                    </div>
+                    <div class="summary-grid" aria-live="polite">
+                        <div class="summary-card">
+                            <h3>IMC</h3>
+                            <strong id="summaryBMI">-</strong>
+                            <small id="summaryBMICategory">Completa peso y altura</small>
+                        </div>
+                        <div class="summary-card">
+                            <h3>Gasto basal</h3>
+                            <strong id="summaryBMR">-</strong>
+                            <small>kcal / día</small>
+                        </div>
+                        <div class="summary-card">
+                            <h3>Gasto total</h3>
+                            <strong id="summaryTDEE">-</strong>
+                            <small>kcal estimadas</small>
+                        </div>
+                        <div class="summary-card">
+                            <h3>Objetivo energético</h3>
+                            <strong id="summaryTargetCalories">-</strong>
+                            <small>Ajustado al objetivo seleccionado</small>
+                        </div>
+                    </div>
+                </div>
+
+                <section class="card" id="datosPaciente">
+                    <h2><span>🗂️</span> Datos del paciente</h2>
+                    <div class="form-grid">
+                        <div>
+                            <label for="nombre">Nombre completo</label>
+                            <input id="nombre" data-field="nombre" placeholder="Ej: Laura Méndez">
+                        </div>
+                        <div>
+                            <label for="email">Email</label>
+                            <input id="email" type="email" data-field="email" placeholder="nombre@correo.com">
+                        </div>
+                        <div>
+                            <label for="telefono">Teléfono</label>
+                            <input id="telefono" data-field="telefono" placeholder="(+54) 11 0000 0000">
+                        </div>
+                        <div>
+                            <label for="edad">Edad</label>
+                            <input id="edad" type="number" min="0" data-field="edad" data-type="number" placeholder="32">
+                        </div>
+                        <div>
+                            <label for="genero">Género</label>
+                            <select id="genero" data-field="genero">
+                                <option value="">Selecciona</option>
+                                <option value="femenino">Femenino</option>
+                                <option value="masculino">Masculino</option>
+                                <option value="otro">Otro / Prefiero no decir</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="ocupacion">Ocupación / Rutina diaria</label>
+                            <input id="ocupacion" data-field="ocupacion" placeholder="Ej: Diseñadora gráfica">
+                        </div>
+                        <div>
+                            <label for="condiciones">Antecedentes médicos relevantes</label>
+                            <textarea id="condiciones" data-field="condiciones" rows="3" placeholder="Ej: Hipotiroidismo tratado, alergia al maní"></textarea>
+                        </div>
+                        <div>
+                            <label for="medicacion">Medicaciones / Suplementos</label>
+                            <textarea id="medicacion" data-field="medicacion" rows="3" placeholder="Ej: Levotiroxina 75 mcg, Omega 3"></textarea>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card" id="evaluacion">
+                    <h2><span>📊</span> Evaluación corporal y parámetros clave</h2>
+                    <div class="form-grid">
+                        <div>
+                            <label for="peso">Peso actual (kg)</label>
+                            <input id="peso" type="number" min="0" step="0.1" data-field="peso" data-type="number" placeholder="65.5">
+                        </div>
+                        <div>
+                            <label for="altura">Altura (cm)</label>
+                            <input id="altura" type="number" min="0" step="0.5" data-field="altura" data-type="number" placeholder="168">
+                        </div>
+                        <div>
+                            <label for="grasa">% grasa corporal</label>
+                            <input id="grasa" type="number" min="0" step="0.1" data-field="grasa" data-type="number" placeholder="24">
+                        </div>
+                        <div>
+                            <label for="musculo">% masa magra / muscular</label>
+                            <input id="musculo" type="number" min="0" step="0.1" data-field="musculo" data-type="number" placeholder="32">
+                        </div>
+                        <div>
+                            <label for="cintura">Perímetro cintura (cm)</label>
+                            <input id="cintura" type="number" min="0" step="0.1" data-field="cintura" data-type="number" placeholder="72">
+                        </div>
+                        <div>
+                            <label for="cadera">Perímetro cadera (cm)</label>
+                            <input id="cadera" type="number" min="0" step="0.1" data-field="cadera" data-type="number" placeholder="96">
+                        </div>
+                        <div>
+                            <label for="actividad">Nivel de actividad física</label>
+                            <select id="actividad" data-field="actividad">
+                                <option value="sedentario">Sedentario - poco o ningún ejercicio</option>
+                                <option value="ligero">Ligero - 1 a 3 entrenamientos/semana</option>
+                                <option value="moderado">Moderado - 3 a 5 entrenamientos/semana</option>
+                                <option value="alto">Alto - 6 a 7 entrenamientos/semana</option>
+                                <option value="atleta">Muy alto - trabajo físico o doble turno</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="presion">Presión arterial / signos vitales</label>
+                            <input id="presion" data-field="presion" placeholder="118/76 mmHg">
+                        </div>
+                    </div>
+                    <div class="alert" id="alertMedidas">Completa peso y altura para obtener el IMC y cálculos energéticos.</div>
+                </section>
+
+                <section class="card" id="objetivos">
+                    <h2><span>🎯</span> Objetivos nutricionales y estrategia</h2>
+                    <div class="two-columns">
+                        <div class="form-grid">
+                            <div>
+                                <label for="objetivo">Objetivo principal</label>
+                                <select id="objetivo" data-field="objetivo">
+                                    <option value="">Selecciona</option>
+                                    <option value="pérdida de peso">Pérdida de peso</option>
+                                    <option value="recomposición">Recomposición corporal</option>
+                                    <option value="rendimiento">Mejora de rendimiento</option>
+                                    <option value="salud metabólica">Salud metabólica</option>
+                                    <option value="otro">Otro</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="estrategia">Estrategia calórica</label>
+                                <select id="estrategia" data-field="estrategia">
+                                    <option value="deficit">Déficit moderado (-15%)</option>
+                                    <option value="mantenimiento">Mantenimiento (0%)</option>
+                                    <option value="superavit">Superávit suave (+15%)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="preferencias">Preferencias y restricciones</label>
+                                <textarea id="preferencias" data-field="preferencias" placeholder="Vegana, evita gluten, no le gusta el apio"></textarea>
+                            </div>
+                            <div>
+                                <label for="alergias">Alérgenos / intolerancias</label>
+                                <textarea id="alergias" data-field="alergias" placeholder="Lácteos, frutos secos"></textarea>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="notas">Notas clínicas y estrategias</label>
+                            <textarea id="notas" data-field="notas" rows="6" placeholder="Define objetivos SMART, educación brindada, derivaciones, etc."></textarea>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card" id="plan">
+                    <h2><span>🍽️</span> Plan alimentario personalizado</h2>
+                    <p>Completa cada comida con los alimentos y cantidades. Las calorías y macronutrientes se suman automáticamente para contrastar con los objetivos.</p>
+                    <table aria-label="Plan alimentario">
+                        <thead>
+                            <tr>
+                                <th>Comida</th>
+                                <th>Preparación / alimentos</th>
+                                <th>Calorías</th>
+                                <th>Proteínas (g)</th>
+                                <th>Carbohidratos (g)</th>
+                                <th>Grasas (g)</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="planTableBody"></tbody>
+                    </table>
+                    <div class="table-actions">
+                        <button class="ghost" id="addRowBtn">➕ Añadir comida</button>
+                        <button class="ghost" id="plantillaBaseBtn">⚡ Generar plantilla base</button>
+                    </div>
+                    <div class="totals-bar">
+                        <span>Total kcal: <strong id="totalCalorias">0</strong></span>
+                        <span>Proteínas: <strong id="totalProteinas">0 g</strong></span>
+                        <span>Carbohidratos: <strong id="totalCarbos">0 g</strong></span>
+                        <span>Grasas: <strong id="totalGrasas">0 g</strong></span>
+                    </div>
+                    <div class="alert" id="alertPlan"></div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <template id="planRowTemplate">
+        <tr>
+            <td><input type="text" placeholder="Desayuno" data-plan-field="comida"></td>
+            <td><textarea placeholder="Ej: Yogur griego, granola, frutos rojos" data-plan-field="detalle"></textarea></td>
+            <td><input type="number" min="0" step="1" placeholder="0" data-plan-field="calorias"></td>
+            <td><input type="number" min="0" step="0.1" placeholder="0" data-plan-field="proteinas"></td>
+            <td><input type="number" min="0" step="0.1" placeholder="0" data-plan-field="carbohidratos"></td>
+            <td><input type="number" min="0" step="0.1" placeholder="0" data-plan-field="grasas"></td>
+            <td class="client-actions"><button class="ghost" data-remove-row title="Eliminar fila">🗑️</button></td>
+        </tr>
+    </template>
+
+    <script>
+        const storageKey = 'nutriProClients_v1';
+        let clients = [];
+        let filteredClients = [];
+        let currentClientId = null;
+
+        const clientListEl = document.getElementById('clientList');
+        const clientSearchEl = document.getElementById('clientSearch');
+        const clientTitleEl = document.getElementById('clientTitle');
+        const clientSubtitleEl = document.getElementById('clientSubtitle');
+        const alertMedidasEl = document.getElementById('alertMedidas');
+        const alertPlanEl = document.getElementById('alertPlan');
+        const planTableBody = document.getElementById('planTableBody');
+
+        const summaryElements = {
+            bmi: document.getElementById('summaryBMI'),
+            bmiCategory: document.getElementById('summaryBMICategory'),
+            bmr: document.getElementById('summaryBMR'),
+            tdee: document.getElementById('summaryTDEE'),
+            targetCalories: document.getElementById('summaryTargetCalories'),
+        };
+
+        const totalsElements = {
+            calorias: document.getElementById('totalCalorias'),
+            proteinas: document.getElementById('totalProteinas'),
+            carbohidratos: document.getElementById('totalCarbos'),
+            grasas: document.getElementById('totalGrasas'),
+        };
+
+        const fieldsConfig = Array.from(document.querySelectorAll('[data-field]')).map((element) => ({
+            element,
+            field: element.dataset.field,
+            type: element.dataset.type || 'text'
+        }));
+
+        const defaultClients = [
+            {
+                id: crypto.randomUUID(),
+                nombre: 'Laura Méndez',
+                email: 'laura.mendez@mail.com',
+                telefono: '+54 9 11 2345 7788',
+                edad: 34,
+                genero: 'femenino',
+                ocupacion: 'Diseñadora UX',
+                condiciones: 'Resistencia a la insulina diagnosticada 2021',
+                medicacion: 'Metformina 850 mg/día',
+                peso: 68,
+                altura: 167,
+                grasa: 28,
+                musculo: 32,
+                cintura: 78,
+                cadera: 101,
+                actividad: 'moderado',
+                presion: '118/76 mmHg',
+                objetivo: 'recomposición',
+                estrategia: 'deficit',
+                preferencias: 'Prefiere pescados, vegetariana entre semana',
+                alergias: 'Intolerancia a la lactosa',
+                notas: 'Acordado déficit suave con énfasis en proteínas. Educación en control de porciones.',
+                plan: [
+                    { comida: 'Desayuno', detalle: 'Yogur sin lactosa + avena + frutos rojos', calorias: 380, proteinas: 24, carbohidratos: 45, grasas: 12 },
+                    { comida: 'Almuerzo', detalle: 'Ensalada tibia de quinoa, salmón grillado, mix de hojas verdes', calorias: 520, proteinas: 36, carbohidratos: 48, grasas: 18 },
+                    { comida: 'Merienda', detalle: 'Batido verde con proteína vegetal y semillas', calorias: 210, proteinas: 18, carbohidratos: 22, grasas: 6 },
+                    { comida: 'Cena', detalle: 'Tofu marinado con vegetales asados y aceite de oliva', calorias: 460, proteinas: 30, carbohidratos: 38, grasas: 20 },
+                ]
+            },
+            {
+                id: crypto.randomUUID(),
+                nombre: 'Martín Quiroga',
+                email: 'martin.quiroga@mail.com',
+                telefono: '+54 9 351 456 9023',
+                edad: 41,
+                genero: 'masculino',
+                ocupacion: 'Ingeniero civil',
+                condiciones: 'Hipercolesterolemia familiar. Antecedente de lumbalgia crónica.',
+                medicacion: 'Atorvastatina 20 mg, vitamina D',
+                peso: 82,
+                altura: 175,
+                grasa: 25,
+                musculo: 35,
+                cintura: 92,
+                cadera: 104,
+                actividad: 'ligero',
+                presion: '124/82 mmHg',
+                objetivo: 'salud metabólica',
+                estrategia: 'mantenimiento',
+                preferencias: 'Omnívoro, disfruta parrillas. Prefiere planificación semanal simple.',
+                alergias: 'Ninguna reportada',
+                notas: 'Trabajar sobre reducción de colesterol LDL y control de porciones. Enfatizar fibra soluble.',
+                plan: [
+                    { comida: 'Desayuno', detalle: 'Tostadas integrales + palta + huevo pochado', calorias: 420, proteinas: 22, carbohidratos: 40, grasas: 20 },
+                    { comida: 'Media mañana', detalle: 'Manzana + puñado de nueces', calorias: 220, proteinas: 5, carbohidratos: 24, grasas: 14 },
+                    { comida: 'Almuerzo', detalle: 'Filete magro a la plancha + ensalada completa', calorias: 540, proteinas: 40, carbohidratos: 38, grasas: 24 },
+                    { comida: 'Merienda', detalle: 'Yogur descremado + semillas de chía', calorias: 180, proteinas: 12, carbohidratos: 18, grasas: 6 },
+                    { comida: 'Cena', detalle: 'Sopa de lentejas y verduras + ensalada verde', calorias: 480, proteinas: 28, carbohidratos: 55, grasas: 12 },
+                ]
+            }
+        ];
+
+        function loadClients() {
+            try {
+                const stored = localStorage.getItem(storageKey);
+                clients = stored ? JSON.parse(stored) : defaultClients;
+            } catch (error) {
+                console.warn('No se pudo cargar desde almacenamiento, se usarán datos por defecto.', error);
+                clients = defaultClients;
+            }
+            filteredClients = [...clients];
+        }
+
+        function persistClients() {
+            try {
+                localStorage.setItem(storageKey, JSON.stringify(clients));
+            } catch (error) {
+                console.warn('No se pudo guardar la base de pacientes.', error);
+            }
+        }
+
+        function renderClients() {
+            clientListEl.innerHTML = '';
+            if (!filteredClients.length) {
+                const li = document.createElement('li');
+                li.textContent = 'No se encontraron pacientes con esa búsqueda.';
+                li.style.color = 'var(--gris-texto)';
+                clientListEl.appendChild(li);
+                return;
+            }
+            filteredClients.forEach((client) => {
+                const li = document.createElement('li');
+                const card = document.createElement('div');
+                card.className = 'client-card' + (client.id === currentClientId ? ' active' : '');
+                const meta = document.createElement('div');
+                meta.className = 'client-meta';
+                const name = document.createElement('strong');
+                name.textContent = client.nombre || 'Paciente sin nombre';
+                const subline = document.createElement('span');
+                const edadText = client.edad ? `${client.edad} años` : 'Edad no registrada';
+                const objetivoText = client.objetivo ? `• ${client.objetivo}` : '';
+                subline.textContent = `${edadText} ${objetivoText}`;
+                meta.append(name, subline);
+
+                const actions = document.createElement('div');
+                actions.className = 'client-actions';
+
+                const selectBtn = document.createElement('button');
+                selectBtn.type = 'button';
+                selectBtn.title = 'Abrir ficha';
+                selectBtn.textContent = '📝';
+                selectBtn.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    selectClient(client.id);
+                });
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.type = 'button';
+                deleteBtn.title = 'Eliminar paciente';
+                deleteBtn.textContent = '🗑️';
+                deleteBtn.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    deleteClient(client.id);
+                });
+
+                actions.append(selectBtn, deleteBtn);
+                card.append(meta, actions);
+                card.addEventListener('click', () => selectClient(client.id));
+                li.appendChild(card);
+                clientListEl.appendChild(li);
+            });
+        }
+
+        function selectClient(id) {
+            currentClientId = id;
+            const client = clients.find((c) => c.id === id);
+            if (!client) return;
+            clientTitleEl.textContent = client.nombre || 'Paciente sin nombre';
+            const detalles = [client.email, client.telefono].filter(Boolean).join(' • ');
+            clientSubtitleEl.textContent = detalles || 'Actualiza los datos para comenzar.';
+            fieldsConfig.forEach(({ element, field }) => {
+                const value = client[field] ?? '';
+                element.value = value;
+            });
+            alertMedidasEl.style.display = 'none';
+            populatePlanTable(client);
+            updateMetrics();
+            renderClients();
+        }
+
+        function deleteClient(id) {
+            const client = clients.find((c) => c.id === id);
+            if (!client) return;
+            const confirmDelete = confirm(`¿Eliminar a ${client.nombre || 'este paciente'}? Esta acción no se puede deshacer.`);
+            if (!confirmDelete) return;
+            clients = clients.filter((c) => c.id !== id);
+            filteredClients = filteredClients.filter((c) => c.id !== id);
+            if (currentClientId === id) {
+                currentClientId = null;
+                clearWorkspace();
+            }
+            persistClients();
+            renderClients();
+        }
+
+        function clearWorkspace() {
+            clientTitleEl.textContent = 'Selecciona un paciente';
+            clientSubtitleEl.textContent = 'Los datos y cálculos se actualizarán automáticamente al editar los campos.';
+            fieldsConfig.forEach(({ element }) => (element.value = ''));
+            planTableBody.innerHTML = '';
+            updatePlanTotals();
+            updateSummaryCards({});
+        }
+
+        function createNewClient() {
+            const newClient = {
+                id: crypto.randomUUID(),
+                nombre: 'Nuevo paciente',
+                email: '',
+                telefono: '',
+                edad: '',
+                genero: '',
+                ocupacion: '',
+                condiciones: '',
+                medicacion: '',
+                peso: '',
+                altura: '',
+                grasa: '',
+                musculo: '',
+                cintura: '',
+                cadera: '',
+                actividad: 'sedentario',
+                presion: '',
+                objetivo: '',
+                estrategia: 'mantenimiento',
+                preferencias: '',
+                alergias: '',
+                notas: '',
+                plan: []
+            };
+            clients.unshift(newClient);
+            filteredClients = [...clients];
+            persistClients();
+            renderClients();
+            selectClient(newClient.id);
+            const nombreInput = document.getElementById('nombre');
+            nombreInput.focus();
+            nombreInput.select();
+        }
+
+        function updateField(field, value, type) {
+            if (!currentClientId) return;
+            const client = clients.find((c) => c.id === currentClientId);
+            if (!client) return;
+            client[field] = type === 'number' ? (value === '' ? '' : Number(value)) : value;
+            persistClients();
+            updateMetrics();
+            if (['nombre', 'edad', 'objetivo', 'email', 'telefono'].includes(field)) {
+                renderClients();
+                clientTitleEl.textContent = client.nombre || 'Paciente sin nombre';
+                const detalles = [client.email, client.telefono].filter(Boolean).join(' • ');
+                clientSubtitleEl.textContent = detalles || 'Actualiza los datos para comenzar.';
+            }
+        }
+
+        function populatePlanTable(client) {
+            planTableBody.innerHTML = '';
+            if (!client.plan || !client.plan.length) {
+                addPlanRow();
+                return;
+            }
+            client.plan.forEach((row) => addPlanRow(row));
+            updatePlanTotals();
+        }
+
+        function addPlanRow(row = {}) {
+            const template = document.getElementById('planRowTemplate');
+            const clone = template.content.firstElementChild.cloneNode(true);
+            Array.from(clone.querySelectorAll('[data-plan-field]')).forEach((input) => {
+                const field = input.dataset.planField;
+                if (row[field] !== undefined) {
+                    input.value = row[field];
+                } else {
+                    input.value = '';
+                }
+                input.addEventListener('input', () => updatePlanRow(clone));
+            });
+            clone.querySelector('[data-remove-row]').addEventListener('click', () => removePlanRow(clone));
+            planTableBody.appendChild(clone);
+            updatePlanRow(clone);
+        }
+
+        function updatePlanRow(rowElement) {
+            if (!currentClientId) return;
+            const client = clients.find((c) => c.id === currentClientId);
+            if (!client) return;
+            const rows = Array.from(planTableBody.querySelectorAll('tr'));
+            client.plan = rows.map((row) => {
+                const cells = row.querySelectorAll('[data-plan-field]');
+                const data = {};
+                cells.forEach((input) => {
+                    const field = input.dataset.planField;
+                    const type = ['calorias', 'proteinas', 'carbohidratos', 'grasas'].includes(field) ? 'number' : 'text';
+                    data[field] = type === 'number' ? (input.value === '' ? 0 : Number(input.value)) : input.value;
+                });
+                return data;
+            });
+            persistClients();
+            updatePlanTotals();
+        }
+
+        function removePlanRow(rowElement) {
+            rowElement.remove();
+            updatePlanRow();
+        }
+
+        function updatePlanTotals() {
+            if (!currentClientId) {
+                totalsElements.calorias.textContent = '0';
+                totalsElements.proteinas.textContent = '0 g';
+                totalsElements.carbohidratos.textContent = '0 g';
+                totalsElements.grasas.textContent = '0 g';
+                alertPlanEl.style.display = 'none';
+                alertPlanEl.textContent = '';
+                return;
+            }
+            const client = clients.find((c) => c.id === currentClientId);
+            if (!client) return;
+            const totals = client.plan.reduce((acc, row) => {
+                acc.calorias += Number(row.calorias) || 0;
+                acc.proteinas += Number(row.proteinas) || 0;
+                acc.carbohidratos += Number(row.carbohidratos) || 0;
+                acc.grasas += Number(row.grasas) || 0;
+                return acc;
+            }, { calorias: 0, proteinas: 0, carbohidratos: 0, grasas: 0 });
+
+            totalsElements.calorias.textContent = Math.round(totals.calorias);
+            totalsElements.proteinas.textContent = `${totals.proteinas.toFixed(1)} g`;
+            totalsElements.carbohidratos.textContent = `${totals.carbohidratos.toFixed(1)} g`;
+            totalsElements.grasas.textContent = `${totals.grasas.toFixed(1)} g`;
+
+            const { targetCalories, suggestedMacros } = calculateMetrics(client);
+            if (targetCalories && totals.calorias) {
+                const diff = totals.calorias - targetCalories;
+                const tolerance = targetCalories * 0.05;
+                if (Math.abs(diff) > tolerance) {
+                    const direction = diff > 0 ? 'Por encima' : 'Por debajo';
+                    alertPlanEl.style.display = 'block';
+                    alertPlanEl.textContent = `${direction} del objetivo en ${Math.abs(diff).toFixed(0)} kcal. Ajusta porciones o comidas para alinearse con ${Math.round(targetCalories)} kcal.`;
+                } else {
+                    alertPlanEl.style.display = 'none';
+                    alertPlanEl.textContent = '';
+                }
+            } else {
+                alertPlanEl.style.display = 'none';
+                alertPlanEl.textContent = '';
+            }
+
+            if (suggestedMacros && targetCalories) {
+                const deviations = [];
+                if (suggestedMacros.proteinas > 0) {
+                    const diffP = totals.proteinas - suggestedMacros.proteinas;
+                    if (Math.abs(diffP) > suggestedMacros.proteinas * 0.1) {
+                        deviations.push(`Proteínas ${diffP > 0 ? '↑' : '↓'} ${Math.abs(diffP).toFixed(1)} g vs ${suggestedMacros.proteinas.toFixed(1)} g`);
+                    }
+                }
+                if (suggestedMacros.carbohidratos > 0) {
+                    const diffC = totals.carbohidratos - suggestedMacros.carbohidratos;
+                    if (Math.abs(diffC) > suggestedMacros.carbohidratos * 0.1) {
+                        deviations.push(`Carbohidratos ${diffC > 0 ? '↑' : '↓'} ${Math.abs(diffC).toFixed(1)} g vs ${suggestedMacros.carbohidratos.toFixed(1)} g`);
+                    }
+                }
+                if (suggestedMacros.grasas > 0) {
+                    const diffF = totals.grasas - suggestedMacros.grasas;
+                    if (Math.abs(diffF) > suggestedMacros.grasas * 0.1) {
+                        deviations.push(`Grasas ${diffF > 0 ? '↑' : '↓'} ${Math.abs(diffF).toFixed(1)} g vs ${suggestedMacros.grasas.toFixed(1)} g`);
+                    }
+                }
+                if (deviations.length) {
+                    alertPlanEl.style.display = 'block';
+                    alertPlanEl.textContent += (alertPlanEl.textContent ? ' | ' : '') + deviations.join(' • ');
+                }
+            }
+        }
+
+        function calculateMetrics(client) {
+            const weight = Number(client.peso);
+            const heightCm = Number(client.altura);
+            const age = Number(client.edad);
+            if (!weight || !heightCm || !age || !client.genero) {
+                return { bmi: null, bmiCategory: null, bmr: null, tdee: null, targetCalories: null, suggestedMacros: null };
+            }
+            const heightM = heightCm / 100;
+            const bmi = weight / (heightM ** 2);
+            const bmiCategory = bmi < 18.5 ? 'Bajo peso' : bmi < 25 ? 'Normopeso' : bmi < 30 ? 'Sobrepeso' : 'Obesidad';
+            const s = client.genero === 'masculino' ? 5 : -161;
+            const bmr = 10 * weight + 6.25 * heightCm - 5 * age + s;
+            const activityFactor = {
+                sedentario: 1.2,
+                ligero: 1.375,
+                moderado: 1.55,
+                alto: 1.725,
+                atleta: 1.9
+            }[client.actividad || 'sedentario'];
+            const tdee = bmr * activityFactor;
+            const strategyFactor = {
+                deficit: 0.85,
+                mantenimiento: 1,
+                superavit: 1.15
+            }[client.estrategia || 'mantenimiento'];
+            const targetCalories = tdee * strategyFactor;
+            const proteinG = weight * 2; // 2 g/kg
+            const fatG = weight * 0.9;   // 0.9 g/kg
+            const carbsCalories = Math.max(targetCalories - (proteinG * 4 + fatG * 9), 0);
+            const carbG = carbsCalories / 4;
+            return {
+                bmi,
+                bmiCategory,
+                bmr,
+                tdee,
+                targetCalories,
+                suggestedMacros: {
+                    proteinas: proteinG,
+                    carbohidratos: carbG,
+                    grasas: fatG
+                }
+            };
+        }
+
+        function updateSummaryCards() {
+            if (!currentClientId) {
+                summaryElements.bmi.textContent = '-';
+                summaryElements.bmiCategory.textContent = 'Completa peso y altura';
+                summaryElements.bmr.textContent = '-';
+                summaryElements.tdee.textContent = '-';
+                summaryElements.targetCalories.textContent = '-';
+                return;
+            }
+            const client = clients.find((c) => c.id === currentClientId);
+            const metrics = calculateMetrics(client);
+            if (!metrics.bmi) {
+                summaryElements.bmi.textContent = '-';
+                summaryElements.bmiCategory.textContent = 'Completa peso, altura, edad y género';
+                summaryElements.bmr.textContent = '-';
+                summaryElements.tdee.textContent = '-';
+                summaryElements.targetCalories.textContent = '-';
+                alertMedidasEl.style.display = 'block';
+                return;
+            }
+            alertMedidasEl.style.display = 'none';
+            summaryElements.bmi.textContent = metrics.bmi.toFixed(1);
+            summaryElements.bmiCategory.textContent = metrics.bmiCategory;
+            summaryElements.bmr.textContent = `${Math.round(metrics.bmr)} kcal`;
+            summaryElements.tdee.textContent = `${Math.round(metrics.tdee)} kcal`;
+            summaryElements.targetCalories.textContent = `${Math.round(metrics.targetCalories)} kcal`;
+        }
+
+        function updateMetrics() {
+            updateSummaryCards();
+            updatePlanTotals();
+        }
+
+        function filterClients(query) {
+            const term = query.trim().toLowerCase();
+            if (!term) {
+                filteredClients = [...clients];
+            } else {
+                filteredClients = clients.filter((client) => {
+                    return [client.nombre, client.email, client.telefono]
+                        .filter(Boolean)
+                        .some((value) => value.toLowerCase().includes(term));
+                });
+            }
+            renderClients();
+        }
+
+        function generateBaseTemplate() {
+            if (!currentClientId) return;
+            const client = clients.find((c) => c.id === currentClientId);
+            if (!client) return;
+            const { targetCalories, suggestedMacros } = calculateMetrics(client);
+            if (!targetCalories) {
+                alert('Completa peso, altura, edad y género para sugerir un plan base.');
+                return;
+            }
+            const meals = ['Desayuno', 'Media mañana', 'Almuerzo', 'Merienda', 'Cena'];
+            const portions = [0.22, 0.12, 0.32, 0.12, 0.22];
+            client.plan = meals.map((meal, index) => {
+                const pct = portions[index];
+                return {
+                    comida: meal,
+                    detalle: '',
+                    calorias: Math.round(targetCalories * pct),
+                    proteinas: Number((suggestedMacros.proteinas * pct).toFixed(1)),
+                    carbohidratos: Number((suggestedMacros.carbohidratos * pct).toFixed(1)),
+                    grasas: Number((suggestedMacros.grasas * pct).toFixed(1)),
+                };
+            });
+            persistClients();
+            populatePlanTable(client);
+        }
+
+        document.getElementById('newClientBtn').addEventListener('click', createNewClient);
+        document.getElementById('addRowBtn').addEventListener('click', () => addPlanRow());
+        document.getElementById('plantillaBaseBtn').addEventListener('click', generateBaseTemplate);
+        clientSearchEl.addEventListener('input', (event) => filterClients(event.target.value));
+
+        fieldsConfig.forEach(({ element, field, type }) => {
+            element.addEventListener('input', (event) => updateField(field, event.target.value, type));
+        });
+
+        loadClients();
+        renderClients();
+        if (clients.length) {
+            selectClient(clients[0].id);
+        }
+    </script>
+</body>
+</html>
